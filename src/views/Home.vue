@@ -45,6 +45,7 @@
 <script>
 import Navbar from '../components/Navbar'
 import axios from 'axios'
+import pusher from 'pusher'
 
 export default {
     components:{
@@ -73,6 +74,7 @@ export default {
         }
     },
     mounted(){
+
         console.log(this.dataUser)
         this.loadPost()
         this.connection  = new WebSocket('ws://localhost:8001/tweet')

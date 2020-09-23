@@ -3,7 +3,7 @@
         <div class="row">
             <!-- Image -->
             <div class="col-md-auto p-0 m-0 post-img">
-                <img :src="postData.image" alt="profile photo">
+                <img :src="postData.user.image" alt="profile photo">
 
             </div>
 
@@ -12,12 +12,12 @@
                 <div class="row">
                     <div class="col-md-auto">
                         <span style="font-weight:bold">
-                            {{postData.name}}
+                            {{postData.user.name}}
                         </span>
-                         @{{postData.username}}. {{postData.created_at}}
+                         @{{postData.user.username}}. {{postData.user.created_at}}
                     </div>
                     <!-- COLLAPSE -->
-                    <div class="col d-flex justify-content-end mr-4" v-if="dataUser.username == postData.username">
+                    <div class="col d-flex justify-content-end mr-4" v-if="dataUser.username == postData.user.username">
                         <span class="fa fa-angle-down" data-toggle="collapse" :data-target="`#collapse${postData.id}`" aria-expanded="false" aria-controls="collapseExample"></span>
                         <div class="collapse mt-3 position-absolute bg-white" :id="`collapse${postData.id}`">
                             <div class="row">
@@ -102,13 +102,13 @@ export default {
         },
 
         async removeLike(){
-            await axios.delete(`http://localhost:8000/likes/?user_id=${this.dataUser.id}&post_id=${this.postData.id}&username=${this.dataUser.username}`)
+            await axios.delete(`http://localhost:8000/likes/?user_id=${this.dataUser.id}&post_id=${this.postData.user.id}&username=${this.dataUser.username}`)
             .then(this.like.likeCurrentUser = 0, this.like.length--)
             .catch(err =>{console.log(err)})
         },
 
         async addLike(){
-            await axios.post(`http://localhost:8000/likes/?user_id=${this.dataUser.id}&post_id=${this.postData.id}&username=${this.dataUser.username}`)
+            await axios.post(`http://localhost:8000/likes/?user_id=${this.dataUser.id}&post_id=${this.postData.user.id}&username=${this.dataUser.username}`)
             .then(this.like.likeCurrentUser = 1,
                     this.like.length++    )
             .catch(err =>{console.log(err)})

@@ -1,15 +1,20 @@
 const express = require('express')
 const app = express()
+
+// var io = require ( 'socket.io' )
+
 var cors = require('cors')
 app.use(express.json())
 app.use(cors())
 const port = 8000
+
 const usersHandler = require('./users/usersHandler');
 const tweetHandler = require('./tweet/tweetHandler');
 const likesHandler = require('./likes/likesHandler');
 const commentsHandler = require('./comments/commentsHandler');
 const auth = require('./auth');
 
+// io.on ( 'conexão' , (soquete) => { console .log ( 'um usuário conectado' ); });
 
 // var bodyParser = require('body-parser')
 
@@ -28,37 +33,37 @@ app.delete('/tweet/:id', tweetHandler.delete)
 app.patch('/tweet/:id', tweetHandler.update)
 
 
-const WebSocket = require('ws') 
-const wss = new WebSocket.Server({port: 8001})
-var clients=[];
+// const WebSocket = require('ws') 
+// const wss = new WebSocket.Server({port: 8001})
+// var clients=[];
 
-wss.on('connection', (ws) =>{
-    client = ws
-    clients.push(client)
+// wss.on('connection', (ws) =>{
+//     client = ws
+//     clients.push(client)
     
-    console.log(`Novo usuário conectado`)
+//     console.log(`Novo usuário conectado`)
 
-    ws.on("message", (data) =>{
-        console.log(`Remover o post ${data}`)
-    })
+//     ws.on("message", (data) =>{
+//         console.log(`Remover o post ${data}`)
+//     })
 
-    ws.on("close", () =>{
-        console.log("Usuário desconectado")
-    })
-})
+//     ws.on("close", () =>{
+//         console.log("Usuário desconectado")
+//     })
+// })
 
-function sendAll(message) {
-    clients.forEach(client =>{
-        client.send(message)
-    })
-}
+// function sendAll(message) {
+//     clients.forEach(client =>{
+//         client.send(message)
+//     })
+// }
 
 
-exports.sendAll = function(message) {
-    clients.forEach(client =>{
-        client.send(message)
-    })
-}
+// exports.sendAll = function(message) {
+//     clients.forEach(client =>{
+//         client.send(message)
+//     })
+// }
 
 //USUÁRIOS
 app.get('/users', usersHandler.get)

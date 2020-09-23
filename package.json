@@ -20,6 +20,8 @@
     "mysql": "^2.18.1",
     "mysql2": "^2.1.0",
     "popper.js": "^1.16.1",
+    "pusher": "^3.0.1",
+    "socket.io": "^2.3.0",
     "vue": "^2.6.11",
     "vue-router": "^3.4.3",
     "vue-websocket": "^0.2.3",

@@ -27,11 +27,11 @@
 
     </div>
 </template>
-
 <script>
 import TweetMessage from '../components/TweetMessage'
 import Tweet from '../components/Tweet'
 import axios from 'axios'
+
 export default {
     components:{
         TweetMessage,
@@ -41,17 +41,57 @@ export default {
     data(){
         return{
             tweets:'',
-            teste:''
+            teste:'',
         }
     },
     methods:{
         async loadPost(){
             let posts = await axios.get("http://localhost:8000/tweet")
+            
+            // var response = {
+            //     comments: post.comment,
+            //     likes: post.like,
+            //     id: post.id,
+            //     post: post.post,
+            //     created_at: post.created_at,
+            //     updated_at: post.updated_at,
+            //     user:{
+            //         id: post.user_id,
+            //         name: post.name,
+            //         username: post.username,
+            //         email: post.email,
+            //         image: post.image,
+            //     },
+            //     image_post: post.image_post,
+            // }
+            /*
+                eslint-disable
+            */
+           console.log(posts.data.post)
+           posts.data.post = posts.data.post.map((post) => {
+                return {
+                    comments: post.comment,
+                    likes: post.like,
+                    id: post.id,
+                    post: post.post,
+                    created_at: post.created_at,
+                    updated_at: post.updated_at,
+                    user:{
+                        id: post.user_id,
+                        name: post.name,
+                        username: post.username,
+                        email: post.email,
+                        image: post.image,
+                    },
+                    image_post: post.image_post,
+                    }
+            })
+            console.log(posts.data.post)
+            // console.log(posts.data.post)
             this.tweets = posts.data.post
         },
 
         deletePost(data){
-            console.log("Post deletado")
             this.tweets = this.tweets.filter(tweet =>{
                 return tweet.id != data.id
             })
@@ -62,7 +102,30 @@ export default {
 
     },
 
+
     mounted(){
+        /*
+        eslint-disable
+        */
+        Pusher.logToConsole = true;
+
+        var pusher = new Pusher('1274225ed523873978b3', {
+        cluster: 'mt1'
+        });
+
+        var channel = pusher.subscribe('createPost');
+        channel.bind('App\\Events\\Post\\UserCreatedPost', (data) => {
+            console.log(data)
+            this.addPost(data.post)
+        });
+
+        var channel = pusher.subscribe('deletePost');
+        channel.bind('App\\Events\\Post\\UserDeletePost', (data) => {
+            this.deletePost(data.post)
+        });
+
+        
+        
         console.log(this.dataUser)
         this.loadPost()
         this.connection  = new WebSocket('ws://localhost:8001/tweet')
