@@ -44,7 +44,6 @@ export default {
             var user = await axios.get(`http://localhost:8000/auth/?id=${this.username}&password=${this.password}`, {id:this.username, password:this.password})
             this.data = user.data.success[0]
             user.data.success.length != 0 ?  this.autenticado() : this.errors = ['usuário ou senha incorreto']
-            
         },
         autenticado(){
             this.$emit("autenticado", true)

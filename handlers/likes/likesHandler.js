@@ -1,5 +1,5 @@
 var knex = require('../connection')
-var app = require('../app')
+var pusher = require('../connectionPusher')
 
 exports.get = (req, res) =>{
     knex.select()
@@ -30,15 +30,17 @@ exports.store = (req, res) => {
           post_id: req.query.post_id,
         })
         .then((user) =>{
-          var response = {
-            type:'Like',
-            method:'GET',
-            username:req.query.username,
+          var like = {
+            user_id:req.query.user_id,
             post_id: req.query.post_id,
           }
-          app.sendAll(JSON.stringify(response))
+
+          pusher.trigger('Home', 'like', {
+            like
+          })
+          
           res.json({
-            success: `Comentário criado com sucesso`
+            success: `Like adicionado com sucesso`
           })
         })
         .catch(err =>{res.status(404).json({err})})

@@ -1,7 +1,7 @@
 var knex = require("./connection")
 
 exports.get = (req, res) =>{
-    console.log(req.body.id)
+    // Trocar para método POST (req.body.id)
     knex('users')
       .where({
         username:req.query.id,
@@ -16,7 +16,6 @@ exports.get = (req, res) =>{
         password: req.query.password
       })
       .then(auth =>{
-        console.log(req.query)
         res.json({
           success:auth
         })

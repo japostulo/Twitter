@@ -1,11 +1,6 @@
 var knex = require('../connection')
 var pusher = require('../connectionPusher')
 
-var app = require('../app')
-// const WebSocket = require("ws")
-
-// const wss = new WebSocket.Server({port: 8001})
-
 exports.store = (req, res) =>{
     req = req.query
     knex('posts')
@@ -16,8 +11,6 @@ exports.store = (req, res) =>{
         })
         .then((post)=>{
             var post = {
-                type:'Tweet',
-                method:'GET',
                 id: post,
                 post:req.post, 
                 user_id:req.user_id,
@@ -31,14 +24,12 @@ exports.store = (req, res) =>{
                     username: req.username,
                     image: req.image
                 }
-                
             }
 
-            pusher.trigger('createPost', 'App\\Events\\Post\\UserCreatedPost', {
+            pusher.trigger('Home', 'createPost', {
                 post
             });
 
-            // app.sendAll(JSON.stringify(tweet))
             res.json({
                 message: 'Post inserido com sucesso'
             })
@@ -46,17 +37,32 @@ exports.store = (req, res) =>{
         .catch(error => res.status(404).json({error}))
 }
 
-
 exports.get = (req, res) =>{
-    console.log('Entrou')
+        // knex('likes')
+        //     .select({postId: 'post.id'}, 'posts.post', 'likes.id', 'likes.post_id', 'likes.user_id')
+        //     .innerJoin('posts', postID, 'likes.post_id')
+        //     // .where(postId, 'likes.post_id')
+        // .then((post)=>{
+        //     res.json({
+        //         post
+        //     })
+        // })
+        // knex.select().from('likes').innerJoin('posts', 'posts.id', 'likes.post_id').where('likes.post_id', 'posts.id').count('*')
+        
+        // knex('users')
+        // .join('contacts', 'users.id', '=', 'contacts.user_id')
+        // .select('users.id', 'contacts.phone')
         knex('posts')
             .select('posts.*','name', 'username','email','image',{
                 comments: function() {
-                    this.count('*').from('comments').where('posts.id', 'comments.post_id')
+                    this.from('comments').count()
                     },
-                likes: function() {
-                    this.count('*').from('likes').where('posts.id', 'likes.post_id') 
-                    },
+                    // .where({
+                    //     'posts.id': 'likes.post_id'
+                    // })
+                // likes: function(value) {
+                //     this.select('id').from('likes').where('posts.id', 'likes.post_id')
+                //     },
             })
             .innerJoin('users', 'users.id', 'posts.user_id')
             .orderBy('posts.id', 'desc')
@@ -83,13 +89,23 @@ exports.getOne = (req, res) =>{
 
 exports.update = (req, res) =>{
     knex('posts')
-        .where('id', req.params.id)
+        .where('posts.id', req.query.id)
         .update({
-            post: req.body.post
+            post: req.query.post
         })
         .then((post) =>{
+
+            var post = {
+                id: req.query.id,
+                post: req.query.post,
+            }
+
+            pusher.trigger('Home', 'editPost',{
+                post
+            })
+
             res.json({
-                success: 'Post atualizado com sucesso'
+                post
             })
         })
         .catch(error =>{res.status(404).json({error})})
@@ -110,11 +126,9 @@ exports.delete = (req, res) =>{
                 id: req.params.id
             }
 
-            pusher.trigger('deletePost', 'App\\Events\\Post\\UserDeletePost', {
+            pusher.trigger('Home', 'deletePost', {
                 post
             });
-
-            // app.sendAll(JSON.stringify(tweet))
             
             res.json({
                 success: `Post ${req.params.id} deletado com sucesso`

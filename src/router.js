@@ -3,7 +3,7 @@ import Router from 'vue-router'
 // import Home from './views/Home.vue'
 import Login from './views/Login.vue'
 import WhatsHappening from './views/WhatsHappening'
-
+import Chat from './views/Chat.vue'
 import Navbar from './components/Navbar'
 
 import Feed from './views/Feed.vue'
@@ -75,7 +75,7 @@ const router = new Router({
             components:{
                 default:Messages,
                 nav:Navbar,
-                whatsHappening: WhatsHappening,
+                whatsHappening: Chat,
             }
         },
 

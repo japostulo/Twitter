@@ -7,7 +7,7 @@
             <hr class="m-0">
             <tweet-message :dataUser="dataUser"/>
             <hr>
-            <tweet :dataUser="dataUser" v-for="(post, index) in tweets" :key="index" :postData="post" userImage="https://novatopnet.com.br/wp-content/uploads/2012/10/anime.jpg"/>
+            <tweet :dataUser="dataUser" :likes="likes" v-for="(post, index) in tweets" :key="index" :postData="post" userImage="https://novatopnet.com.br/wp-content/uploads/2012/10/anime.jpg"/>
         </div>  
 
         <div class="modal fade" id="tweetModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -42,36 +42,24 @@ export default {
         return{
             tweets:'',
             teste:'',
+            likes:[],
         }
     },
     methods:{
         async loadPost(){
             let posts = await axios.get("http://localhost:8000/tweet")
-            
-            // var response = {
-            //     comments: post.comment,
-            //     likes: post.like,
-            //     id: post.id,
-            //     post: post.post,
-            //     created_at: post.created_at,
-            //     updated_at: post.updated_at,
-            //     user:{
-            //         id: post.user_id,
-            //         name: post.name,
-            //         username: post.username,
-            //         email: post.email,
-            //         image: post.image,
-            //     },
-            //     image_post: post.image_post,
-            // }
-            /*
-                eslint-disable
-            */
-           console.log(posts.data.post)
-           posts.data.post = posts.data.post.map((post) => {
+            // console.log(this.likes.likes)
+            posts.data.post = posts.data.post.map((post) => {
+                console.log("Entrou")
+                let likes = this.likes.forEach((like)=>{
+                                console.log(like)
+                                console.log(post.id)
+                            })
+
+                // console.log(likes)
                 return {
                     comments: post.comment,
-                    likes: post.like,
+                    likes: likes,
                     id: post.id,
                     post: post.post,
                     created_at: post.created_at,
@@ -86,8 +74,6 @@ export default {
                     image_post: post.image_post,
                     }
             })
-            console.log(posts.data.post)
-            // console.log(posts.data.post)
             this.tweets = posts.data.post
         },
 
@@ -95,81 +81,72 @@ export default {
             this.tweets = this.tweets.filter(tweet =>{
                 return tweet.id != data.id
             })
+
+        },
+        editPost(data){
+            this.tweets.map(tweet =>{
+                tweet.id == data.id ? tweet.post = data.post:false
+            })
         },
         addPost(data){
             this.tweets.unshift(data)
         },
 
-    },
+        async getLikes(){
+            this.likes = await axios.get(`http://localhost:8000/likes/`)
+            this.likes = this.likes.data.likes
+            // console.log(this.like)
+            this.loadPost()
+        },
 
+
+
+        // async removeLike(){
+        //     await axios.delete(`http://localhost:8000/likes/?user_id=${this.dataUser.id}&post_id=${this.postData.id}`)
+        //     .then()
+        //     .catch(err =>{console.log(err)})
+        // },
+
+        // async addLike(){
+        //     await axios.post(`http://localhost:8000/likes/?user_id=${this.dataUser.id}&post_id=${this.postData.id}`)
+        //     .then()
+        //     .catch(err =>{console.log(err)})
+        // },
+
+    },
 
     mounted(){
         /*
         eslint-disable
         */
-        Pusher.logToConsole = true;
+        try{
+    
+            var channelHome = pusher.subscribe('Home');
 
-        var pusher = new Pusher('1274225ed523873978b3', {
-        cluster: 'mt1'
-        });
+            channelHome.bind('createPost', (data) => {
+                this.addPost(data.post)
+            });
 
-        var channel = pusher.subscribe('createPost');
-        channel.bind('App\\Events\\Post\\UserCreatedPost', (data) => {
-            console.log(data)
-            this.addPost(data.post)
-        });
+            channelHome.bind('deletePost', (data) => {
+                this.deletePost(data.post)
+            });
 
-        var channel = pusher.subscribe('deletePost');
-        channel.bind('App\\Events\\Post\\UserDeletePost', (data) => {
-            this.deletePost(data.post)
-        });
+            channelHome.bind('editPost', (data) =>{
+                this.editPost(data.post)
+            })
 
-        
-        
-        console.log(this.dataUser)
-        this.loadPost()
-        this.connection  = new WebSocket('ws://localhost:8001/tweet')
+            channelHome.bind('like', (data) =>{
+                console.log(data)
+            })
 
-        this.connection.onopen = () =>{
-            console.log("Estabelecido conexão com a rota tweet");
+
+            this.getLikes()
         }
 
-        this.connection.onmessage = ({data}) =>{
-            data = JSON.parse(data)
-
-            if(data.type == 'Tweet'){
-
-                if(data.method == 'GET'){
-                    this.addPost(data)
-                }
-
-                else if(data.method == 'DELETE'){
-                    this.deletePost(data)
-                }
-
-                else{
-                    console.log("Não existe o método")
-                }
-            }
-
-            if(data.type == 'Like'){
-
-                if(data.method == 'GET'){
-                    this.tweet = this.tweets.map((tweet) => {
-                        if(tweet.id == data.post_id){
-                            return tweet.name = 'João Lindo'
-                        }
-                        return tweet
-                    })
-                }
-
-            }
-
-            else{
-                console.log("Type não encontrado")
-            }
-            
+        catch(err){
+            console.log(`Erro capturado durante a conexão com o Pusher \n\n${err}`)
         }
+
     }
 
 }
