@@ -52,20 +52,34 @@ exports.get = (req, res) =>{
         // knex('users')
         // .join('contacts', 'users.id', '=', 'contacts.user_id')
         // .select('users.id', 'contacts.phone')
-        knex('posts')
-            .select('posts.*','name', 'username','email','image',{
-                comments: function() {
-                    this.from('comments').count()
-                    },
-                    // .where({
-                    //     'posts.id': 'likes.post_id'
-                    // })
-                // likes: function(value) {
-                //     this.select('id').from('likes').where('posts.id', 'likes.post_id')
-                //     },
+        // knex('posts')
+        //     .select('posts.*','name', 'username','email','image',{
+        //         comments: function() {
+        //             this.from('comments').count()
+        //             },
+        //             // .where({
+        //             //     'posts.id': 'likes.post_id'
+        //             // })
+        //         // likes: function(value) {
+        //         //     this.select('id').from('likes').where('posts.id', 'likes.post_id')
+        //         //     },
+        //     })
+        //     .innerJoin('users', 'users.id', 'posts.user_id')
+        //     .orderBy('posts.id', 'desc')
+        knex('posts').select('posts.*', 'name', 'username','email','image',)
+        .innerJoin('users', 'users.id', 'posts.user_id')
+        .count('likes.id as likes')
+        .count('comments.id as comments')
+        .leftJoin('likes','posts.id','likes.post_id')
+        .leftJoin('comments','posts.id','comments.post_id')
+        .orderBy('posts.id','desc')
+        .groupBy('posts.id')
+        .then((posts)=>{
+            console.log(posts)
+            res.json({
+                posts
             })
-            .innerJoin('users', 'users.id', 'posts.user_id')
-            .orderBy('posts.id', 'desc')
+        })
         .then((post)=>{
             res.json({
                 post
@@ -86,6 +100,7 @@ exports.getOne = (req, res) =>{
         })
         .catch(error =>{res.status(404).json({error})})
 }
+
 
 exports.update = (req, res) =>{
     knex('posts')

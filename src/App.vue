@@ -3,13 +3,12 @@
     <div class="row">
 
         <router-view :dataUser="data" name="nav"/>
-        
 
-     
-        <router-view @autenticado="autenticado = $event" @data="data = $event" :dataUser="data"/>
+        <router-view @autenticado="autenticado = $event" @data="data = $event" @chatData="chatData = $event" :dataUser="data"/>
 
-        <router-view name="whatsHappening"/>
-
+        <keep-alive>
+          <router-view :dataUser="data" :chatData="chatData"  name="whatsHappening"/>
+        </keep-alive>
     </div>
   </div>
     
@@ -23,7 +22,8 @@ export default {
     return{
       autenticado: false,
       data:'',
-      connection: null
+      connection: null,
+      chatData:''
     }
   },
   watch:{
@@ -35,10 +35,8 @@ export default {
     sendMessage(message){
       this.connection.send(message)    
   },
+
   },
-  mounted(){
-      
-  }
 }
 </script>
 <style>

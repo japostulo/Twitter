@@ -1,5 +1,5 @@
 <template>
-    <div class="col col-sm-10 col-md-8 col-lg-6 col-xl-5">
+    <div class="col col-sm-10 col-md-8 col-lg-6 col-xl-4">
         <!-- Content -->
 
         <div class="content p-2">
@@ -7,7 +7,7 @@
             <hr class="m-0">
             <tweet-message :dataUser="dataUser"/>
             <hr>
-            <tweet :dataUser="dataUser" :likes="likes" v-for="(post, index) in tweets" :key="index" :postData="post" userImage="https://novatopnet.com.br/wp-content/uploads/2012/10/anime.jpg"/>
+            <tweet :dataUser="dataUser"  v-for="(post, index) in tweets" :key="index" :postLiked="postLiked(post.id)" :postData="post" userImage="https://novatopnet.com.br/wp-content/uploads/2012/10/anime.jpg"/>
         </div>  
 
         <div class="modal fade" id="tweetModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -48,22 +48,16 @@ export default {
     methods:{
         async loadPost(){
             let posts = await axios.get("http://localhost:8000/tweet")
-            // console.log(this.likes.likes)
-            posts.data.post = posts.data.post.map((post) => {
-                console.log("Entrou")
-                let likes = this.likes.forEach((like)=>{
-                                console.log(like)
-                                console.log(post.id)
-                            })
+            posts.data.posts = posts.data.posts.map((post) => {
 
-                // console.log(likes)
                 return {
-                    comments: post.comment,
-                    likes: likes,
+                    likes: post.likes,
+                    comments: post.comments,
                     id: post.id,
                     post: post.post,
                     created_at: post.created_at,
                     updated_at: post.updated_at,
+                    likeCurrentUser:false,
                     user:{
                         id: post.user_id,
                         name: post.name,
@@ -74,7 +68,8 @@ export default {
                     image_post: post.image_post,
                     }
             })
-            this.tweets = posts.data.post
+
+            this.tweets = posts.data.posts
         },
 
         deletePost(data){
@@ -93,10 +88,17 @@ export default {
         },
 
         async getLikes(){
-            this.likes = await axios.get(`http://localhost:8000/likes/`)
+            this.likes = await axios.get(`http://localhost:8000/likes/${this.dataUser.id}`)
             this.likes = this.likes.data.likes
-            // console.log(this.like)
             this.loadPost()
+        },
+
+        postLiked(postId){
+            let like = this.likes.some((like)=>{
+                return like.post_id == postId 
+            })
+            return like
+         
         },
 
 
@@ -136,9 +138,8 @@ export default {
             })
 
             channelHome.bind('like', (data) =>{
-                console.log(data)
-            })
 
+            })
 
             this.getLikes()
         }

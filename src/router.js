@@ -73,9 +73,9 @@ const router = new Router({
             path: '/messages',
             name: 'Messages',
             components:{
-                default:Messages,
+                default:Chat,
                 nav:Navbar,
-                whatsHappening: Chat,
+                whatsHappening: Messages,
             }
         },
 

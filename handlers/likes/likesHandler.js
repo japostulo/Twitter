@@ -11,6 +11,19 @@ exports.get = (req, res) =>{
         })
 }
 
+
+exports.getUserLike = (req, res) =>{
+
+  knex.select()
+      .table('likes')
+      .where('user_id', req.params.id)
+      .then((likes) =>{
+          res.json({
+            likes
+          })
+      })
+}
+
 exports.getOne = (req, res) =>{
     knex.select()
         .table('likes')

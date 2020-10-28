@@ -207,23 +207,12 @@ export default {
         }
     },
 
-    watch:{
-        dataUser(){
-            console.log('caraio')
-            console.log(this.dataUser)
-        }
-    },
 
     mounted(){
         this.name = this.dataUser.name
         this.username = this.dataUser.username
-    }
 
-    // async mounted(){
-    //     let req = await axios.get(`http://localhost:8000/users/1`)
-    //     this.name = req.data.user[0].name
-    //     this.username = `@${req.data.user[0].username}`
-    // }
+    }
 }
 </script>
 

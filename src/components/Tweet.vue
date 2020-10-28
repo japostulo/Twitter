@@ -56,10 +56,10 @@
 
                 <div class="row">
                     <div class="col-md-auto">
-                        <span class="fa fa-comment"></span>
+                        <span class="fa fa-comment"> <small> {{postData.comments}} </small> </span>
                     </div>
                     <div class="col-md-auto">
-                        <span class="fa fa-thumbs-up" :class="{'text-primary' :  like.likeCurrentUser != 0}" @click="validateLike(postData.id)"> <small> {{like.length}} </small> </span>
+                        <span class="fa fa-thumbs-up" :class="postData.likeCurrentUser ? 'text-primary':false" @click="validateLike(postData.id)"> <small> {{postData.likes == '' ? '': postData.likes}} </small> </span>
                     </div>
                 </div>
 
@@ -123,36 +123,22 @@
 <script>
 import axios from 'axios'
 export default {
-    props:['postData', 'userImage', 'dataUser'],
+    props:['postData', 'dataUser', 'postLiked'],
     data(){
         return{
             selected:true,
             connection: null,
             like: {
-                likeCurrentUser:false,
                 data:null,
                 length:'',
-                connection: null
+                connection: null,
             },
-
         }
     },
     methods:{
         deletePost(){
             axios.delete(`http://localhost:8000/tweet/${this.postData.id}`)
             .catch(err =>{console.log(err)})
-        },
-
-        async getLikes(){
-            this.like.data = await axios.get(`http://localhost:8000/likes/${this.postData.id}`)
-            this.like.data = this.like.data.data
-
-            if(this.like.data.user != ''){
-                this.like.likeCurrentUser = this.like.data.user.filter((post)=> {
-                    return post.user_id == this.dataUser.id
-                })
-                this.like.length = this.like.data.user.length
-            }   
         },
 
         async editPost(){
@@ -162,23 +148,28 @@ export default {
 
         async removeLike(id){
             await axios.delete(`http://localhost:8000/likes/?user_id=${this.dataUser.id}&post_id=${id}`)
-            .then(this.like.likeCurrentUser = 0, this.like.length--)
+            .then(() =>{
+                this.postData.likeCurrentUser = false
+                this.postData.likes --
+            })
             .catch(err =>{console.log(err)})
         },
 
         async addLike(id){
+
             await axios.post(`http://localhost:8000/likes/?user_id=${this.dataUser.id}&post_id=${id}`)
-            .then(this.like.likeCurrentUser = 1,
-                    this.like.length++    )
+            .then(() => {
+                this.postData.likeCurrentUser = true
+                this.postData.likes ++
+                })
             .catch(err =>{console.log(err)})
         },
 
-        validateLike(id){
-            this.like.likeCurrentUser != 0 ? this.removeLike(id) : this.addLike(id)
-        },
-        getHour(){
 
-        }
+        validateLike(id){
+            this.postData.likeCurrentUser == false ? this.addLike(id): this.removeLike(id)
+        },
+
 
     },
     watch:{
@@ -187,7 +178,8 @@ export default {
         }
     },
     mounted(){
-        this.getLikes();      
+        this.postData.likes == true ? this.postData.likeCurrentUser = true: this.postData.likeCurrentUser = false
+        // console.log(this.postData.likeCurrentUser)
     }
 
 }
